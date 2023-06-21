@@ -53,7 +53,7 @@ python main.py --wandb_id $YOUR_WANDB_ID --class_acc=True --classes_per_task=10 
 
 
 
-### Citing the Project
+### Citing the Paper
 
 ```Array.<string>
 @misc{Lesort2023Challenging,
