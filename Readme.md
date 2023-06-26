@@ -29,14 +29,14 @@ The main contribution of this work is to show precisely that the effect of catas
 and that it does not prevent knowledge accumulation. 
 Secondly, it proposes an evaluation framework (SCoLe) to study the knowledge accumulation in DNNs at scale.
 
-We hope that this benchmark will help to design the continual algorithms that could be efficient and deployable.
+We hope that this benchmark will help to design continual algorithms that could be efficient and deployable.
 
 
 ## SCoLe
 
 SCoLe (Scaling Continual Learning) is a continual learning framework for generating long sequences of tasks with various
 frequencies of tasks and classes. It is made to study the knowledge accumulation capability of learning algorithms.
-The scenario is generated from a fixed datasets, then each task is generated online by randomly selecting a subset of classes
+The scenario is generated from a fixed dataset, then each task is generated online by randomly selecting a subset of classes
 or data point.
 
 
@@ -44,11 +44,11 @@ or data point.
 <img src="./Images/scole.png" width="800" alt="Illustration of SCoLe scenario">
 </p>
 
-By training and long sequences of automatically generated tasks can can visualize progress (knowledge accumulation)
-by plotting evaluation of accuracy on the test set composed of all classes.
+By training and long sequences of automatically generated tasks, we can visualize progress (knowledge accumulation)
+by plotting the evaluation of accuracy on the test set composed of all classes.
 
 
-In the paper, we show that the knowledge accumulation consistently happens on various datasets and architectures which means that catastrophic forgetting is consistently limited in its effect on the whole model.
+In the paper, we show that knowledge accumulation consistently happens on various datasets and architectures which means that catastrophic forgetting is consistently limited in its effect on the whole model.
 
 <p align="center">
 <img src="./Images/KA_datasets.png" width="400" alt="Knowledge Accumulation on Various Dataset through Long Sequences of Tasks.">
@@ -56,24 +56,24 @@ In the paper, we show that the knowledge accumulation consistently happens on va
 
 
 
-To analyse further, we can control the probability of sampling classses to control there frequency of appearance in the sequence of task.
-As such we can visualize knowledge accumulation with respect to classes frequency of appearances:
+To analyse further, we can control the probability of sampling classes to control their frequency of appearance in the sequence of tasks.
+As such we can visualize knowledge accumulation with respect to classes' frequency of appearances:
 
 When all classes are sampled with the same frequency (balanced distribution):
 
 <p align="center">
-<img src="./Images/balanced.png" width="400" alt="Illustration of Results with Balanced Distribution of Classes within the Scenario.">
+<img src="./Images/balanced.png" width="400" alt=" Illustration of Results with Balanced Distribution of Classes within the Scenario.">
 </p>
 
 
-or when all classes are sampled with different distribution:
+or when all classes are sampled with different distributions:
 
 <p align="center">
-<img src="./Images/unbalanced.png" width="400" alt="Illustration of Results with Unbalanced Distribution of Classes within the Scenario.">
+<img src="./Images/unbalanced.png" width="400" alt=" Illustration of Results with Unbalanced Distribution of Classes within the Scenario.">
 </p>
 
 The influence of various design choices, such as hyper-parameters,
-can then be evaluated to know which composition lead to the best knowledge accumulation.
+can then be evaluated to know which composition leads to the best knowledge accumulation.
 
 ## Installation
 ```bash
@@ -91,7 +91,7 @@ One run with MNIST, 2 classes per task, 1 epoch per task,500 tasks using group m
 python main.py --wandb_id $YOUR_WANDB_ID  --classes_per_task=2 --dataset=MNIST --masking=group --momentum=0 --nb_epochs=1 --classes_per_task=2 --num_classes=10 --num_tasks=500 --optim=Adam
 ```
 
-One run with 100 classes of TinyImagenet with random pertubation (severity 1), imbalanced class distribution by factor 2 (param: entropy_decrease), 1 epoch per task, 10 classes per task, 2500 tasks using group masking on SGD optimization and no momentum. (estimated duration ~15hrs)
+One run with 100 classes of TinyImagenet with random perturbation (severity 1), imbalanced class distribution by factor 2 (param: entropy_decrease), 1 epoch per task, 10 classes per task, 2500 tasks using group masking on SGD optimization and no momentum. (estimated duration ~15hrs)
 ```bash
 python main.py --wandb_id $YOUR_WANDB_ID --class_acc=True --classes_per_task=10 --dataset=Tiny --entropy_decrease=2 --lr=0.01 --masking=group --momentum=0 --nb_epochs=1 --num_classes=100 --num_tasks=2500 --optim=SGD --rand_transform=perturbations --severity=1
 ```
