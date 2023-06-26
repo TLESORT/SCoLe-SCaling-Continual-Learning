@@ -23,6 +23,44 @@ sparsely re-occurring, the overall accuracy improves, which might be counter-int
 phenomenon. We empirically investigate KA in DNNs under various data occurrence frequencies
 and propose simple and scalable strategies to increase knowledge accumulation in DNNs.
 
+## Main Contributions
+
+The main contribution of this work is to show precisely that the effect of catastrophic forgetting is limited on deep neural networks (DNNs)
+and that it does not prevent knowledge accumulation. 
+Secondly, it proposes an evaluation framework (SCoLe) to study the knowledge accumulation in DNNs at scale.
+
+We hope that this benchmark will help to design the continual algorithms that could be efficient and deployable.
+
+
+## SCoLe
+
+SCoLe (Scaling Continual Learning) is a continual learning framework for generating long sequences of tasks with various
+frequencies of tasks and classes. It is made to study the knowledge accumulation capability of learning algorithms.
+The scenario is generated from a fixed datasets, then each task is generated online by randomly selecting a subset of classes
+or data point.
+
+By training and long sequences of automatically generated tasks can can visualize progress (knowledge accumulation)
+by plotting evaluation of accuracy on the test set composed of all classes.
+
+<img src="./Images/scole.png" width="800" alt="Illustration of SCoLe scenario">
+
+
+We can control the probability of sampling classses to control there frequency of appearance in the sequence of task.
+As such we can visualize knowledge accumulation with respect to classes frequency of appearances:
+
+When all classes are sampled with the same frequency (balanced distribution):
+
+<img src="./Images/balanced.png" width="800" alt="Illustration of Results with Balanced Distribution of Classes within the Scenario.">
+
+or when all classes are sampled with different distribution:
+
+
+<img src="./Images/unbalanced.png" width="800" alt="Illustration of Results with Unbalanced Distribution of Classes within the Scenario.">
+
+
+The influence of various design choices, such as hyper-parameters,
+can then be evaluated to know which composition lead to the best knowledge accumulation.
+
 ## Installation
 ```bash
 pip install -r requirement.txt
