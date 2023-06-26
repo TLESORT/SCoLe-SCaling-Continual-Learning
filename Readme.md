@@ -39,15 +39,24 @@ frequencies of tasks and classes. It is made to study the knowledge accumulation
 The scenario is generated from a fixed datasets, then each task is generated online by randomly selecting a subset of classes
 or data point.
 
-By training and long sequences of automatically generated tasks can can visualize progress (knowledge accumulation)
-by plotting evaluation of accuracy on the test set composed of all classes.
 
 <p align="center">
 <img src="./Images/scole.png" width="800" alt="Illustration of SCoLe scenario">
 </p>
 
+By training and long sequences of automatically generated tasks can can visualize progress (knowledge accumulation)
+by plotting evaluation of accuracy on the test set composed of all classes.
 
-We can control the probability of sampling classses to control there frequency of appearance in the sequence of task.
+
+In the paper, we show that the knowledge accumulation consistently happens on various datasets and architectures which means that catastrophic forgetting is consistently limited in its effect on the whole model.
+
+<p align="center">
+<img src="./Images/KA_datasets.png" width="400" alt="Knowledge Accumulation on Various Dataset through Long Sequences of Tasks.">
+</p>
+
+
+
+To analyse further, we can control the probability of sampling classses to control there frequency of appearance in the sequence of task.
 As such we can visualize knowledge accumulation with respect to classes frequency of appearances:
 
 When all classes are sampled with the same frequency (balanced distribution):
