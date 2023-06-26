@@ -42,7 +42,9 @@ or data point.
 By training and long sequences of automatically generated tasks can can visualize progress (knowledge accumulation)
 by plotting evaluation of accuracy on the test set composed of all classes.
 
+<p align="center">
 <img src="./Images/scole.png" width="800" alt="Illustration of SCoLe scenario">
+</p>
 
 
 We can control the probability of sampling classses to control there frequency of appearance in the sequence of task.
@@ -50,13 +52,16 @@ As such we can visualize knowledge accumulation with respect to classes frequenc
 
 When all classes are sampled with the same frequency (balanced distribution):
 
-<img src="./Images/balanced.png" width="800" alt="Illustration of Results with Balanced Distribution of Classes within the Scenario.">
+<p align="center">
+<img src="./Images/balanced.png" width="400" alt="Illustration of Results with Balanced Distribution of Classes within the Scenario.">
+</p>
+
 
 or when all classes are sampled with different distribution:
 
-
-<img src="./Images/unbalanced.png" width="800" alt="Illustration of Results with Unbalanced Distribution of Classes within the Scenario.">
-
+<p align="center">
+<img src="./Images/unbalanced.png" width="400" alt="Illustration of Results with Unbalanced Distribution of Classes within the Scenario.">
+</p>
 
 The influence of various design choices, such as hyper-parameters,
 can then be evaluated to know which composition lead to the best knowledge accumulation.
