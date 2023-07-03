@@ -23,7 +23,7 @@ from global_settings import * # sets the device globally
 
 
 
-def get_dataset(dataset_name, data_dir, architecture="default"):
+def get_dataset(config, dataset_name, data_dir, architecture="default"):
     transformations = None
     transformations_te = None
     if dataset_name == "MNIST":
@@ -128,6 +128,28 @@ def get_dataset(dataset_name, data_dir, architecture="default"):
         transformations = [transforms.Resize((size, size)),transforms.ToTensor(),
             transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])]
         transformations_te = transformations
+
+    if config.num_tasks == 1:
+        # we are in a iid training
+        print(
+            f"We are in a IID training config.num_classes = {nb_classes} and  config.classes_per_task = {nb_classes}"
+        )
+        config.num_classes = nb_classes
+        config.classes_per_task = nb_classes
+
+    # if we do not use all classes we select a random subset of classes
+    if nb_classes != config.num_classes:
+        class_set = np.random.choice(np.arange(nb_classes), size=config.num_classes, replace=False)
+
+        dataset_train = dataset_train.slice(keep_classes=class_set)
+        dataset_test = dataset_test.slice(keep_classes=class_set)
+
+        unique_vals, new_y = np.unique(dataset_train.data[1], return_inverse=True)
+        dataset_train.data = (dataset_train.data[0], new_y, dataset_train.data[2])
+
+        unique_vals, new_y = np.unique(dataset_test.data[1], return_inverse=True)
+        dataset_test.data = (dataset_test.data[0], new_y, dataset_test.data[2])
+
     return dataset_train, dataset_test, nb_classes, input_d, transformations, transformations_te
 
 

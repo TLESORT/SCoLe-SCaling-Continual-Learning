@@ -27,19 +27,8 @@ def run_scenario(config):
         from perturbations.test_perturbations import PerturbationTransform
 
     dataset_train, dataset_test, nb_classes, input_d, transformations, transformations_te = \
-        get_dataset(config.dataset, config.data_dir, config.architecture)
+        get_dataset(config, config.dataset, config.data_dir, config.architecture)
     config.input_d = input_d
-
-    class_set = np.random.choice(np.arange(nb_classes), size=config.num_classes, replace=False)
-
-    dataset_train = dataset_train.slice(keep_classes=class_set)
-    dataset_test = dataset_test.slice(keep_classes=class_set)
-
-    unique_vals, new_y = np.unique(dataset_train.data[1], return_inverse=True)
-    dataset_train.data = (dataset_train.data[0], new_y, dataset_train.data[2])
-
-    unique_vals, new_y = np.unique(dataset_test.data[1], return_inverse=True)
-    dataset_test.data = (dataset_test.data[0], new_y, dataset_test.data[2])
 
     if config.scenario == "alma":
         from continuum.scenarios import ALMA
@@ -53,14 +42,6 @@ def run_scenario(config):
             scenario = ClassIncremental(dataset_train, nb_tasks=config.num_classes, transformations=transformations)
             scenario_te = ClassIncremental(dataset_test, nb_tasks=config.num_classes,
                                            transformations=transformations_te)
-
-    if config.num_tasks == 1:
-        # we are in a iid training
-        print(
-            f"We are in a IID training config.num_classes = {nb_classes} and  config.classes_per_task = {nb_classes}"
-        )
-        config.num_classes = nb_classes
-        config.classes_per_task = nb_classes
 
     model = get_model(config, device=device)
 
