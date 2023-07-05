@@ -7,6 +7,7 @@ import torch.nn as nn
 import pandas as pd
 import torch.nn.functional as F
 import torch.optim as optim
+from utils_training import reset_all_weights
 from continuum.tasks import TaskType, get_balanced_sampler
 from continuum.datasets import CIFAR10, CIFAR100, KMNIST, MNIST, FashionMNIST, CUB200, Car196, FGVCAircraft, TinyImageNet200
 

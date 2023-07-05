@@ -3,7 +3,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.models as models
 
-# device = 'cuda' if torch.cuda.is_available() else 'cpu'
 from global_settings import * # sets the device globally
 from copy import deepcopy
 
