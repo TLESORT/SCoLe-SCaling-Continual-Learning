@@ -96,9 +96,9 @@ One run with 100 classes of TinyImagenet with random perturbation (severity 1), 
 python main.py --wandb_api_key $YOUR_WANDB_API_KEY --class_acc=True --classes_per_task=10 --dataset=Tiny --entropy_decrease=2 --lr=0.01 --masking=group --momentum=0 --nb_epochs=1 --num_classes=100 --num_tasks=2500 --optim=SGD --rand_transform=perturbations --severity=1
 ```
   
-One run with CIFAR100 dataset with wide resnet (use the pretrained_model parameter together with reinit_model):
+One run with CIFAR100 dataset with wide resnet with growth factor 2 (use the pretrained_model parameter together with reinit_model):
 ```bash
-python main.py --wandb_api_key $YOUR_WANDB_API_KEY --classes_per_task 2 --dataset CIFAR100 --masking group --momentum 0 --nb_epochs 1 --pretrained_model wrn --classes_per_task 2 --num_classes 10 --num_tasks 500 --optim Adam --reinit_model 1
+python main.py --wandb_api_key $YOUR_WANDB_API_KEY --classes_per_task 2 --dataset CIFAR100 --masking group --momentum 0 --nb_epochs 1 --pretrained_model wrn --wrn_width_factor 2 --classes_per_task 2 --num_classes 10 --num_tasks 500 --optim Adam --reinit_model 1
 ```
 
 Same as above with frequency replay (by default frequency replay classes between frequency low_frequency=0.01 and high_frequency=0.1 ) (estimated duration ~16hrs)
