@@ -88,17 +88,22 @@ If you are looking for the exact configuration to reproduce one figure of the pa
 
 One run with MNIST, 2 classes per task, 1 epoch per task,500 tasks using group masking on Adam optimization. (estimated duration ~20mins)
 ```bash
-python main.py --wandb_id $YOUR_WANDB_ID  --classes_per_task=2 --dataset=MNIST --masking=group --momentum=0 --nb_epochs=1 --classes_per_task=2 --num_classes=10 --num_tasks=500 --optim=Adam
+python main.py --wandb_api_key $YOUR_WANDB_API_KEY  --classes_per_task=2 --dataset=MNIST --masking=group --momentum=0 --nb_epochs=1 --classes_per_task=2 --num_classes=10 --num_tasks=500 --optim=Adam
 ```
 
 One run with 100 classes of TinyImagenet with random perturbation (severity 1), imbalanced class distribution by factor 2 (param: entropy_decrease), 1 epoch per task, 10 classes per task, 2500 tasks using group masking on SGD optimization and no momentum. (estimated duration ~15hrs)
 ```bash
-python main.py --wandb_id $YOUR_WANDB_ID --class_acc=True --classes_per_task=10 --dataset=Tiny --entropy_decrease=2 --lr=0.01 --masking=group --momentum=0 --nb_epochs=1 --num_classes=100 --num_tasks=2500 --optim=SGD --rand_transform=perturbations --severity=1
+python main.py --wandb_api_key $YOUR_WANDB_API_KEY --class_acc=True --classes_per_task=10 --dataset=Tiny --entropy_decrease=2 --lr=0.01 --masking=group --momentum=0 --nb_epochs=1 --num_classes=100 --num_tasks=2500 --optim=SGD --rand_transform=perturbations --severity=1
+```
+  
+One run with CIFAR100 dataset with wide resnet (use the pretrained_model parameter together with reinit_model):
+```bash
+python main.py --wandb_api_key $YOUR_WANDB_API_KEY --classes_per_task 2 --dataset CIFAR100 --masking group --momentum 0 --nb_epochs 1 --pretrained_model wrn --classes_per_task 2 --num_classes 10 --num_tasks 500 --optim Adam --reinit_model 1
 ```
 
 Same as above with frequency replay (by default frequency replay classes between frequency low_frequency=0.01 and high_frequency=0.1 ) (estimated duration ~16hrs)
 ```bash
-python main.py --wandb_id $YOUR_WANDB_ID --class_acc=True --classes_per_task=10 --dataset=Tiny --entropy_decrease=2 --lr=0.01 --masking=group --momentum=0 --nb_epochs=1 --num_classes=100 --num_tasks=2500 --optim=SGD --rand_transform=perturbations --replay=frequency --severity=1
+python main.py --wandb_api_key $YOUR_WANDB_API_KEY --class_acc=True --classes_per_task=10 --dataset=Tiny --entropy_decrease=2 --lr=0.01 --masking=group --momentum=0 --nb_epochs=1 --num_classes=100 --num_tasks=2500 --optim=SGD --rand_transform=perturbations --replay=frequency --severity=1
 ```
 
 

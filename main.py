@@ -9,7 +9,6 @@ import torchvision
 import numpy as np
 from continuum.scenarios import ClassIncremental, ContinualScenario
 from sampling import get_probability, get_classes
-from eval import probe_knn
 from Utils import *
 from utils_training import run_taskset
 from Models.encoders import encoders
@@ -17,6 +16,7 @@ from continuum.tasks.utils import split_train_val
 from replay import FrequencyReplay, RandomReplay
 import timeit
 
+from global_settings import * # sets the device globally
 from torchvision import transforms
 
 
@@ -30,18 +30,14 @@ def run_scenario(config):
         get_dataset(config, config.dataset, config.data_dir, config.architecture)
     config.input_d = input_d
 
-    if config.scenario == "alma":
-        from continuum.scenarios import ALMA
-        scenario = ALMA(dataset_train, nb_megabatches=config.num_tasks, transformations=transformations)
-        scenario_te = ALMA(dataset_test, nb_megabatches=config.num_tasks, transformations=transformations_te)
+
+    if config.dataset == "CIFAR100Lifelong":
+        scenario = ContinualScenario(dataset_train, transformations=transformations)
+        scenario_te = ContinualScenario(dataset_test, transformations=transformations_te)
     else:
-        if config.dataset == "CIFAR100Lifelong":
-            scenario = ContinualScenario(dataset_train, transformations=transformations)
-            scenario_te = ContinualScenario(dataset_test, transformations=transformations_te)
-        else:
-            scenario = ClassIncremental(dataset_train, nb_tasks=config.num_classes, transformations=transformations)
-            scenario_te = ClassIncremental(dataset_test, nb_tasks=config.num_classes,
-                                           transformations=transformations_te)
+        scenario = ClassIncremental(dataset_train, nb_tasks=config.num_classes, transformations=transformations)
+        scenario_te = ClassIncremental(dataset_test, nb_tasks=config.num_classes,
+                                        transformations=transformations_te)
 
     model = get_model(config, device=device)
 
@@ -51,8 +47,6 @@ def run_scenario(config):
         settings=wandb.Settings(start_method="fork"),
         group="Scole",
         id=wandb.util.generate_id(),
-        entity="clip_cl",
-        notes=f"No notes yet",
         tags=[config.optim],
         config=config,
     )
@@ -97,12 +91,6 @@ def run_scenario(config):
             if config.prob_reduction != 0:
                 probability[classes] /= config.prob_reduction
                 probability = probability / probability.sum()
-
-        elif config.setup == "domain":
-            # we keep the same classes for all tasks
-            assert len(class_set) == config.classes_per_task
-            # classes have been remaped
-            classes = np.arange(len(class_set))
         else:
             classes = task_collection[task_id]
 
@@ -114,10 +102,6 @@ def run_scenario(config):
         if config.dataset == "CIFAR100Lifelong":
             if config.num_tasks == 1:
                 taskset_tr = full_tr_dataset
-            elif config.setup == "domain":
-                env_id = task_id % 5
-                taskset_tr = scenario[env_id]
-            else:
                 env_id = task_id % 5
                 taskset_tr = deepcopy(scenario[env_id])
                 indexes = np.where(np.isin(taskset_tr._y, classes))[0]
@@ -125,10 +109,7 @@ def run_scenario(config):
                 taskset_tr._y = taskset_tr._y[indexes]
                 taskset_tr._t = taskset_tr._t[indexes]
         else:
-            if config.scenario == "alma":
-                taskset_tr = scenario[task_id]
-            else:
-                taskset_tr = scenario[classes]
+            taskset_tr = scenario[classes]
 
         assert len(taskset_tr) > 0
         taskset_tr, taskset_val = split_train_val(taskset_tr, val_split=0.1)
@@ -224,12 +205,6 @@ def run_scenario(config):
             dict_task_results = {**dict_task_results,
                                  "test_acc_per_class": {str(i): acc for i, acc in enumerate(test_acc_per_class)}}
 
-        if config.prob_knn:
-            if task_id % config.knn_every == 0:
-                test_acc_knn = probe_knn(full_tr_dataset, full_te_dataset, model, nb_classes=taskset_tr.nb_classes,
-                                         batch_size=config.batch_size)
-                dict_task_results['test_acc_knn'] = test_acc_knn
-
         wandb.log(dict_task_results)
 
         print("\n Time to run a task is:", timeit.default_timer() - starttime, "\n")
@@ -246,7 +221,7 @@ if __name__ == "__main__":
     parser.add_argument("--root_dir", type=str, default="./Archives")
     parser.add_argument("--data_dir", type=str, default="../Datasets")
     parser.add_argument("--project", type=str, default="Scole")
-    parser.add_argument("--wandb_id", type=str, default="TLESORT")
+    parser.add_argument("--wandb_api_key", type=str, default=None)
 
     parser.add_argument("--dataset", type=str, default="MNIST",
                         choices=["MNIST", "CIFAR10", "CIFAR100", "CUB200", "KMNIST", "fashion", "Car196", "Aircraft",
@@ -254,7 +229,7 @@ if __name__ == "__main__":
     parser.add_argument("--num_tasks", type=int, default=5, help="Task number")
     parser.add_argument("--prob_reduction", type=int, default=0,
                         help="reduce probability of visiting a class already visited")
-    parser.add_argument("--num_classes", type=int, default=10, help="Task class in the full scenario")
+    parser.add_argument("--num_classes", type=int, default=10, help="Task class in the full scenario") 
     parser.add_argument("--model", type=str, default="baseResnet", choices=["alexnet", "resnet", "googlenet", "vgg"])
     parser.add_argument("--classes_per_task", type=int, default=2, help="number of classes wanted in each task")
     parser.add_argument("--nb_epochs", type=int, default=1, help="nb epoch to train")
@@ -265,22 +240,22 @@ if __name__ == "__main__":
                         choices=["Adadelta", "Adagrad", "AdamW", "SparseAdam", "Adamax", "ASGD", "LBFGS", "NAdam",
                                  "RMSprop", "Rprop", "SGD", "Adam"])
     parser.add_argument("--setup", default="online", type=str,
-                        choices=["online", "preset", "incremental", "incremental_fc", "domain"])
+                        choices=["online", "preset", "incremental", "incremental_fc"])
     parser.add_argument('--replay', default="None", type=str,
                         choices=["None", "default", "frequency", "freq_acc", "random"])
-    parser.add_argument('--replay_budget', default="1.0", type=float)
+    parser.add_argument('--replay_budget', default=1.0, type=float)
     parser.add_argument("--low_frequency", default=0.01, type=float)
     parser.add_argument("--high_frequency", default=0.1, type=float)
     parser.add_argument("--lr", default=0.01, type=float)
     parser.add_argument("--momentum", default=0.0, type=float)
-    parser.add_argument("--entropy_decrease", default=0, type=float)
+    parser.add_argument("--entropy_decrease", default=0, type=float)          
     parser.add_argument("--rand_transform", default="None", type=str, choices=["None", "perturbations"])
     parser.add_argument("--seed", default="1664", type=int)
     parser.add_argument("--forgetting", type=bool, default=False, help="flag to assess if forgetting still happens")
     parser.add_argument("--masking", default="None", type=str, choices=["None", "group"])
     parser.add_argument("--head", default="linear", type=str, choices=["linear", "weightnorm"])
     parser.add_argument("--scenario", default="default", type=str,
-                        choices=["default", "incremental", "alma", "classical_cl_repeated",
+                        choices=["default", "incremental", "classical_cl_repeated",
                                  "classical_cl_repeated_permuted"])
     parser.add_argument("--batch_size", default=64, type=int, help="Batch size")
     parser.add_argument("--early_stopping", default=0, type=int, help="early stopping criterion, if 0 no early stopping"
@@ -292,11 +267,8 @@ if __name__ == "__main__":
     parser.add_argument("--reinit_opt", default="No", type=str, help="Reinitialize optimizer for each task")
     parser.add_argument("--class_acc", type=bool, default=False, help="log accuracy for each class separately")
     parser.add_argument('--debug', type=int, default=0)
-    parser.add_argument('--prob_knn', type=int, default=0)
-    parser.add_argument('--knn_every', type=int, default=5)
 
     parser.add_argument('--checkpoint_dir', type=str, default="/mnt/home/Projects/convergence/checkpoints")
-    parser.add_argument('--revisit_meta_task_every', type=int, default=0)
 
     parser.add_argument('--use_predefined_hps', type=int, default=0,
                         help="if 1 uses predefined hyperparameters found with preliminary hp search")
@@ -324,6 +296,9 @@ if __name__ == "__main__":
     if config.wandb_offline:
         print(config.root_dir)
         os.environ["WANDB_MODE"] = "offline"
+    
+    if config.wandb_api_key is not None:
+        os.environ["WANDB_API_KEY"] = config.wandb_api_key
 
     np.random.seed(config.seed)
     torch.manual_seed(config.seed)
@@ -352,9 +327,5 @@ if __name__ == "__main__":
 
     if config.early_stopping != 0:
         config.nb_epochs = max(config.nb_epochs, 200)
-
-    if config.setup == "domain":
-        config.num_classes = config.classes_per_task
-
 
     run_scenario(config)
